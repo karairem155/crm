@@ -412,6 +412,25 @@ async function saveLead() {
   const lastName  = document.getElementById('inp-lastname').value.trim();
   if (!firstName) { document.getElementById('inp-firstname').focus(); return; }
 
+  const phone = document.getElementById('inp-phone').value.trim();
+  const email = document.getElementById('inp-email').value.trim();
+
+  // ── Aynı telefon numarası uyarısı ──
+  // Son 10 haneye bakar; böylece +90 / 0 / boşluk-tire farkları sorun olmaz.
+  if (phone) {
+    const digits = p => (p || '').replace(/\D/g, '').slice(-10);
+    const np = digits(phone);
+    if (np) {
+      const dup = leads.find(l => l.id !== editingLeadId && digits(l.phone) === np);
+      if (dup) {
+        const dupName = [dup.first_name, dup.last_name].filter(Boolean).join(' ') || 'İsimsiz kayıt';
+        if (!confirm(`⚠️ Bu telefon numarası zaten kayıtlı:\n\n${dupName} — ${dup.phone}\n\nYine de kaydetmek istiyor musun?`)) {
+          return;
+        }
+      }
+    }
+  }
+
   const btn = document.querySelector('.btn-save');
   btn.disabled = true;
 
@@ -419,8 +438,8 @@ async function saveLead() {
     const { error } = await db.from('leads').update({
       first_name: firstName,
       last_name:  lastName  || null,
-      phone:      document.getElementById('inp-phone').value.trim() || null,
-      email:      document.getElementById('inp-email').value.trim() || null,
+      phone:      phone || null,
+      email:      email || null,
       status:     modalStatuses,
     }).eq('id', editingLeadId);
 
@@ -432,8 +451,8 @@ async function saveLead() {
     const { data, error } = await db.from('leads').insert({
       first_name: firstName,
       last_name:  lastName  || null,
-      phone:      document.getElementById('inp-phone').value.trim() || null,
-      email:      document.getElementById('inp-email').value.trim() || null,
+      phone:      phone || null,
+      email:      email || null,
       status:     modalStatuses,
       added_by:   currentUser,
     }).select().single();
