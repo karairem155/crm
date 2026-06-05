@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- loading bar -->
+<div id="loading-bar" style="position:fixed;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:0;transition:opacity .3s;z-index:999"></div>
+
+<!-- toasts -->
+<div id="error-toast" class="hidden" style="position:fixed;bottom:20px;right:20px;background:#ef4444;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:999"></div>
+<div id="copy-toast"  class="hidden" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;font-size:13px;z-index:999"></div>
+
+<!-- mobile top bar -->
+<div class="mobile-bar">
+  <button class="hamburger" onclick="toggleSidebar()" id="hamburger-btn">☰</button>
+  <span class="mobile-title">CRM</span>
+  <button class="add-btn-mobile" onclick="openAddModal()">+</button>
+</div>
+
+<!-- sidebar overlay -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo">CRM</span>
+      <button class="add-btn" onclick="openAddModal()">+ Lead Ekle</button>
+    </div>
+
+    <div class="search-wrap">
+      <input id="search-input" type="text" placeholder="İsim, telefon veya e-posta ara…" oninput="renderList()" />
+    </div>
+
+    <div class="filter-wrap">
+      <button class="filter-chip active" onclick="setFilter(this,'all')">Tümü</button>
+      <button class="filter-chip" onclick="setFilter(this,'hesap-acildi')">Hesap Açıldı</button>
+      <button class="filter-chip" onclick="setFilter(this,'yakin-takip')">Yakın Takip</button>
+      <button class="filter-chip" onclick="setFilter(this,'uzak-takip')">Uzak Takip</button>
+      <button class="filter-chip" onclick="setFilter(this,'ilgisiz')">İlgisiz</button>
+      <button class="filter-chip" onclick="setFilter(this,'yatirimci')">Yatırımcı</button>
+      <button class="filter-chip filter-chip-alert" onclick="setFilter(this,'hatirlat')">⏰ Hatırlatıcılar</button>
+    </div>
+
+    <ul class="lead-list" id="lead-list"></ul>
+
+    <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)">
+        <span>👤 <span id="current-user-label">—</span></span>
+        <button onclick="changeUser()" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:11px;text-decoration:underline">değiştir</button>
+      </div>
+      <button onclick="openTelegramSettings()" class="telegram-btn" id="telegram-connect-btn">
+        <span>✈️ Telegram Bildirimi</span>
+        <span id="telegram-status-dot" class="tg-dot-off"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── DETAIL ── -->
+  <main class="detail">
+
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">👤</div>
+      <p>Sol taraftan bir lead seç veya yeni lead ekle</p>
+    </div>
+
+    <div id="lead-detail" class="lead-detail hidden">
+
+      <!-- mobile back button -->
+      <button class="back-btn" onclick="mobileBack()">← Geri</button>
+
+      <!-- reminder banner -->
+      <div id="reminder-banner" class="reminder-banner hidden"></div>
+
+      <div class="detail-header">
+        <div id="det-avatar" class="detail-avatar"></div>
+        <div class="detail-title">
+          <h2 id="det-name"></h2>
+          <div id="detail-status-selector" class="status-selector">
+            <button class="status-btn" data-status="hesap-acildi">Hesap Açıldı</button>
+            <button class="status-btn" data-status="yakin-takip">Yakın Takip</button>
+            <button class="status-btn" data-status="uzak-takip">Uzak Takip</button>
+            <button class="status-btn" data-status="ilgisiz">İlgisiz</button>
+            <button class="status-btn" data-status="yatirimci">Yatırımcı</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="delete-lead-btn" onclick="openEditModal()" title="Düzenle" style="font-size:14px">✏️</button>
+          <button class="delete-lead-btn" onclick="deleteLead()" title="Leadi sil">🗑</button>
+        </div>
+      </div>
+
+      <div id="det-days-since" class="days-since-row"></div>
+
+      <div class="info-cards">
+        <div class="info-card" style="justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="info-icon">📞</div>
+            <div>
+              <div class="info-label">Telefon</div>
+              <div class="info-value" id="det-phone"></div>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyField('phone')" title="Kopyala">⎘</button>
+        </div>
+        <div class="info-card" style="justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="info-icon">✉️</div>
+            <div>
+              <div class="info-label">E-posta</div>
+              <div class="info-value" id="det-email"></div>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyField('email')" title="Kopyala">⎘</button>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">🕐</div>
+          <div>
+            <div class="info-label">Son Görüşme</div>
+            <div class="info-value" id="det-last-contact"></div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">📅</div>
+          <div>
+            <div class="info-label">Eklenme Tarihi</div>
+            <div class="info-value" id="det-created"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Notlar</h3>
+        <div class="note-input-wrap">
+          <textarea id="note-input" placeholder="Görüşme notunu buraya yaz…"></textarea>
+          <button class="btn-add-note" onclick="addNote()">Not Ekle</button>
+        </div>
+        <div id="notes-history" class="notes-history"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── LEAD MODAL ── -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Yeni Lead Ekle</h2>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>İsim</label>
+          <input id="inp-firstname" type="text" placeholder="Ali" />
+        </div>
+        <div class="form-group">
+          <label>Soyisim</label>
+          <input id="inp-lastname" type="text" placeholder="Yılmaz" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Telefon</label>
+        <input id="inp-phone" type="tel" placeholder="+90 555 000 00 00" />
+      </div>
+      <div class="form-group">
+        <label>E-posta</label>
+        <input id="inp-email" type="email" placeholder="ali@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Durum</label>
+        <div id="modal-status-selector" class="status-selector" style="margin-top:4px">
+          <button class="status-btn" data-status="hesap-acildi">Hesap Açıldı</button>
+          <button class="status-btn" data-status="yakin-takip">Yakın Takip</button>
+          <button class="status-btn active" data-status="uzak-takip">Uzak Takip</button>
+          <button class="status-btn" data-status="ilgisiz">İlgisiz</button>
+          <button class="status-btn" data-status="yatirimci">Yatırımcı</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">İptal</button>
+      <button class="btn-save" onclick="saveLead()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── USERNAME MODAL ── -->
+<div id="username-modal" class="modal-overlay hidden">
+  <div class="modal" style="width:360px">
+    <div class="modal-header">
+      <h2>Adın ne?</h2>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>İsim (notlarda görünecek)</label>
+        <input id="inp-username" type="text" placeholder="Örn: Ali" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" onclick="saveUsername()">Devam Et</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TELEGRAM MODAL ── -->
+<div id="telegram-modal" class="modal-overlay hidden">
+  <div class="modal" style="width:420px">
+    <div class="modal-header">
+      <h2>✈️ Telegram Bildirimi</h2>
+      <button class="close-btn" onclick="closeTelegramModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tg-instructions">
+        <p><b>Nasıl kurulur?</b></p>
+        <ol style="margin:8px 0 0 16px;line-height:2">
+          <li>Telegram'da <b>@userinfobot</b>'a herhangi bir mesaj at</li>
+          <li>Bot sana <b>Id:</b> ile başlayan bir sayı gönderecek</li>
+          <li>O sayıyı aşağıya yapıştır</li>
+        </ol>
+        <p style="margin-top:10px;font-size:12px;opacity:.7">Not bildirimler günde bir kez, sayfa açılışında gönderilir.</p>
+      </div>
+      <div class="form-group" style="margin-top:14px">
+        <label>Telegram Chat ID</label>
+        <input id="inp-telegram-id" type="text" placeholder="Örn: 123456789" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeTelegramModal()">İptal</button>
+      <button class="btn-save" onclick="saveTelegramId()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
