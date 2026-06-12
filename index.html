@@ -39,13 +39,13 @@
     </div>
 
     <div class="filter-wrap">
-      <button class="filter-chip active" onclick="setFilter(this,'all')">Tümü</button>
-      <button class="filter-chip" onclick="setFilter(this,'hesap-acildi')">Hesap Açıldı</button>
-      <button class="filter-chip" onclick="setFilter(this,'yakin-takip')">Yakın Takip</button>
-      <button class="filter-chip" onclick="setFilter(this,'uzak-takip')">Uzak Takip</button>
-      <button class="filter-chip" onclick="setFilter(this,'ilgisiz')">İlgisiz</button>
-      <button class="filter-chip" onclick="setFilter(this,'yatirimci')">Yatırımcı</button>
-      <button class="filter-chip filter-chip-alert" onclick="setFilter(this,'hatirlat')">⏰ Hatırlatıcılar</button>
+      <button class="filter-chip active" data-filter="all" onclick="setFilter(this,'all')">Tümü <span class="chip-count">0</span></button>
+      <button class="filter-chip" data-filter="hesap-acildi" onclick="setFilter(this,'hesap-acildi')">Hesap Açıldı <span class="chip-count">0</span></button>
+      <button class="filter-chip" data-filter="yakin-takip" onclick="setFilter(this,'yakin-takip')">Yakın Takip <span class="chip-count">0</span></button>
+      <button class="filter-chip" data-filter="uzak-takip" onclick="setFilter(this,'uzak-takip')">Uzak Takip <span class="chip-count">0</span></button>
+      <button class="filter-chip" data-filter="ilgisiz" onclick="setFilter(this,'ilgisiz')">İlgisiz <span class="chip-count">0</span></button>
+      <button class="filter-chip" data-filter="yatirimci" onclick="setFilter(this,'yatirimci')">Yatırımcı <span class="chip-count">0</span></button>
+      <button class="filter-chip filter-chip-alert" data-filter="hatirlat" onclick="setFilter(this,'hatirlat')">⏰ Hatırlatıcılar <span class="chip-count">0</span></button>
     </div>
 
     <ul class="lead-list" id="lead-list"></ul>

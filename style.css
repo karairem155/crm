@@ -94,6 +94,25 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 .filter-chip:hover { border-color: var(--accent); color: var(--accent); }
 .filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+/* kategori sayı rozeti */
+.chip-count {
+  display: inline-block;
+  min-width: 16px;
+  padding: 0 5px;
+  margin-left: 3px;
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 15px;
+  vertical-align: middle;
+}
+.filter-chip.active .chip-count { background: rgba(255,255,255,.25); color: #fff; }
+.filter-chip-alert .chip-count { background: rgba(245,158,11,.18); color: #f59e0b; }
+.filter-chip-alert.active .chip-count { background: rgba(0,0,0,.2); color: #000; }
+
 .lead-list { list-style: none; overflow-y: auto; flex: 1; padding: 8px 0; }
 .lead-list::-webkit-scrollbar { width: 4px; }
 .lead-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }

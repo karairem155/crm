@@ -164,8 +164,27 @@ function computeToggle(current, clicked) {
   return arr;
 }
 
+// ── Kategori sayıları ─────────────────────────────────────
+function updateFilterCounts() {
+  const counts = {
+    all: leads.length,
+    'hesap-acildi': 0, 'yakin-takip': 0, 'uzak-takip': 0, 'ilgisiz': 0, 'yatirimci': 0,
+    hatirlat: 0,
+  };
+  leads.forEach(l => {
+    getStatuses(l).forEach(s => { if (counts[s] !== undefined) counts[s]++; });
+    if (getDaysOverdue(l) !== null) counts.hatirlat++;
+  });
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    const key = chip.dataset.filter;
+    const badge = chip.querySelector('.chip-count');
+    if (badge && counts[key] !== undefined) badge.textContent = counts[key];
+  });
+}
+
 // ── Render List ───────────────────────────────────────────
 function renderList() {
+  updateFilterCounts();
   const q  = document.getElementById('search-input').value.toLowerCase().trim();
   const ul = document.getElementById('lead-list');
   ul.innerHTML = '';
@@ -178,12 +197,8 @@ function renderList() {
     return matchFilter && (!q || full.includes(q));
   });
 
-  // Vadesi geçenler üste gelsin
-  filtered.sort((a, b) => {
-    const aOver = getDaysOverdue(a) !== null ? 1 : 0;
-    const bOver = getDaysOverdue(b) !== null ? 1 : 0;
-    return bOver - aOver;
-  });
+  // En yeni eklenen en üstte (eklenme tarihine göre azalan)
+  filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   if (!filtered.length) {
     ul.innerHTML = '<li class="list-empty">Lead bulunamadı</li>';
